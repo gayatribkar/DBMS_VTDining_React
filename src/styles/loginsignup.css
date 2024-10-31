@@ -1,0 +1,188 @@
+/* Auth.css - Basic styling for the login and signup pages */
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #f5f5f5, #fff);
+  }
+  
+  .auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+  }
+  
+  .auth-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 350px;
+    text-align: center;
+  }
+  
+  .logo-container {
+    margin-bottom: 20px;
+  }
+  
+  .logo {
+    width: 100px;
+    height: auto;
+  }
+  
+  h2 {
+    color: #660000; /* Virginia Tech Maroon */
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .input-group label {
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  
+  input:focus {
+    border-color: #FF8C00; /* Virginia Tech Orange */
+    outline: none;
+  }
+  
+  .btn-login, .btn-signup {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FF8C00; /* Virginia Tech Orange */
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .btn-login:hover, .btn-signup:hover {
+    background-color: #e67e22;
+  }
+  
+  p {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
+  a {
+    color: #660000; /* Maroon for links */
+    text-decoration: none;
+  }
+
+  .logo {
+    width: 200px;
+    height: 200px;
+    /* Optional: Make the image responsive */
+    max-width: 100%;
+    height: auto;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Overall form container */
+.form-container {
+    background-color: #fff;
+    padding: 30px;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Logo container */
+  .logo-container {
+    margin-bottom: 20px;
+  }
+  
+  /* Logo styling */
+  .logo {
+    width: 120px; /* Adjust width as needed */
+    height: auto; /* Adjust height proportionally */
+    margin: 0 auto;
+  }
+  
+  /* Form title */
+  .form-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: maroon;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Form group styling */
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Submit button */
+  .btn-submit {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: orange;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .btn-submit:hover {
+    background-color: darkorange;
+  }
+  
+  /* Login link */
+  .login-link {
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .login-link a {
+    color: maroon;
+    text-decoration: none;
+  }
+  
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+  

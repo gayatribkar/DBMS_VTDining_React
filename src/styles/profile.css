@@ -1,0 +1,68 @@
+.content-section {
+  margin: 50px auto; /* Center the section */
+  padding: 20px; /* Padding around the content */
+  border-radius: 8px; /* Rounded corners */
+  background-color: #f9f9f9; /* Light background */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.section-title {
+  font-size: 2em; /* Large title size */
+  margin-bottom: 10px; /* Space below the title */
+  color: #333; /* Dark color for the title */
+}
+
+.profile-details {
+  margin-top: 20px; /* Space above details */
+  padding: 15px; /* Inner padding for the details box */
+  background-color: #fff; /* White background for details */
+  border: 1px solid #ddd; /* Light border */
+  border-radius: 8px; /* Rounded corners for details box */
+}
+
+.profile-details h3 {
+  font-size: 1.5em; /* Size for the subheading */
+  margin-bottom: 15px; /* Space below the subheading */
+  color: #000; /* Black color for the subheading */
+}
+
+.profile-details p {
+  margin: 10px 0; /* Space between paragraphs */
+  line-height: 1.6; /* Better line height */
+  color: #555; /* Gray color for paragraph text */
+}
+
+.profile-details strong {
+  color: #000; /* Black color for labels */
+}
+
+.form-group {
+  margin-bottom: 15px; /* Space below form groups */
+}
+
+.form-group label {
+  display: block; /* Make labels block-level */
+  margin-bottom: 5px; /* Space below labels */
+}
+
+.form-group input,
+.form-group select {
+  width: 100%; /* Full width inputs */
+  padding: 10px; /* Inner padding for inputs */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px; /* Rounded corners for inputs */
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.btn-edit, .btn-save {
+  background-color: #28a745; /* Green color for buttons */
+  color: white; /* White text */
+  padding: 10px 15px; /* Padding for buttons */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.btn-edit:hover, .btn-save:hover {
+  background-color: #218838; /* Darker green on hover */
+}
