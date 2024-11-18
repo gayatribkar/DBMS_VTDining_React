@@ -11,7 +11,6 @@ const DiningHallDetails = () => {
       { name: "Hokie Grill", menu: [{ item: "Burger", price: "$5" }, { item: "Fries", price: "$2" }] },
       { name: "Dolci", menu: [{ item: "Pasta", price: "$7" }, { item: "Salad", price: "$4" }] },
     ],
-    // Other dining halls...
   };
 
   useEffect(() => {

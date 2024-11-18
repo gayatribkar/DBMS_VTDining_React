@@ -6,10 +6,9 @@ import '../styles/Dashboard.css';
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // Mock function for navigation (you'll replace this with react-router)
   const handleNavigation = (path) => {
     console.log(`Navigating to ${path}`);
-    navigate(path);  // Uncomment this line when using react-router
+    navigate(path);  
   };
 
   return (

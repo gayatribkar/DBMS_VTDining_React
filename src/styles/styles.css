@@ -1,5 +1,3 @@
-/* Auth.css - Basic styling for the login and signup pages */
-
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
@@ -33,7 +31,7 @@ body {
   }
   
   h2 {
-    color: #660000; /* Virginia Tech Maroon */
+    color: #660000;
     margin-bottom: 20px;
   }
   
@@ -58,7 +56,7 @@ body {
   }
   
   input:focus {
-    border-color: #FF8C00; /* Virginia Tech Orange */
+    border-color: #FF8C00; 
     outline: none;
   }
   
@@ -67,7 +65,7 @@ body {
     padding: 10px;
     border: none;
     border-radius: 8px;
-    background-color: #FF8C00; /* Virginia Tech Orange */
+    background-color: #FF8C00; 
     color: #fff;
     font-size: 18px;
     cursor: pointer;
@@ -84,14 +82,13 @@ body {
   }
   
   a {
-    color: #660000; /* Maroon for links */
+    color: #660000; 
     text-decoration: none;
   }
 
   .logo {
     width: 200px;
     height: 200px;
-    /* Optional: Make the image responsive */
     max-width: 100%;
     height: auto;
   }
@@ -100,7 +97,7 @@ body {
     text-decoration: underline;
   }
   
-  /* Overall form container */
+
 .form-container {
     background-color: #fff;
     padding: 30px;
@@ -111,19 +108,16 @@ body {
     text-align: center;
   }
   
-  /* Logo container */
   .logo-container {
     margin-bottom: 20px;
   }
   
-  /* Logo styling */
   .logo {
-    width: 120px; /* Adjust width as needed */
-    height: auto; /* Adjust height proportionally */
+    width: 120px; 
+    height: auto; 
     margin: 0 auto;
   }
   
-  /* Form title */
   .form-title {
     font-size: 24px;
     font-weight: bold;
@@ -132,7 +126,7 @@ body {
     margin-bottom: 20px;
   }
   
-  /* Form group styling */
+
   .form-group {
     margin-bottom: 15px;
     text-align: left;
@@ -154,7 +148,7 @@ body {
     border: 1px solid #ccc;
   }
   
-  /* Submit button */
+
   .btn-submit {
     width: 100%;
     padding: 10px;
@@ -171,7 +165,6 @@ body {
     background-color: darkorange;
   }
   
-  /* Login link */
   .login-link {
     text-align: center;
     margin-top: 15px;
