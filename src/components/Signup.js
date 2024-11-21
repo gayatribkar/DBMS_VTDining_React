@@ -18,6 +18,7 @@ const SignUp = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -30,13 +31,44 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    const errors = [];
 
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-
     if (!passwordRegex.test(form.password)) {
-      alert(
-        "Password must be at least 6 characters long and include at least one letter, one number, and one special character."
-      );
+      errors.push("Password must be at least 6 characters long and include at least one letter, one number, and one special character.");
+    }
+
+    if (userType === 'student') {
+      const birthDate = new Date(form.dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      if (age < 12) {
+        errors.push("Students must be at least 12 years old.");
+      }
+
+      if (!/^\d{10}$/.test(form.phone)) {
+        errors.push("Phone number must be exactly 10 digits.");
+      }
+
+      if (!/^\d{9}$/.test(form.studentId)) {
+        errors.push("Student ID must be exactly 9 digits.");
+      }
+
+      if (!form.email.endsWith("@vt.edu")) {
+        errors.push("Email must end with @vt.edu");
+      }
+    } else {
+      // Admin-specific validations can be added here if needed
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join("\n"));
       return;
     }
 
@@ -69,7 +101,9 @@ const SignUp = () => {
           office_location: form.officeLocation,
         };
       }
-      console.log('Request body:', formData);
+
+      console.log('Request body:', JSON.stringify(formData, null, 2));
+
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -78,22 +112,33 @@ const SignUp = () => {
         body: JSON.stringify(formData),
       });
 
-      console.log(response)
+      const responseData = await response.json();
+      console.log('Server response:', responseData);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        throw new Error(responseData.message || 'Registration failed');
       }
 
-      localStorage.setItem("userDetails", JSON.stringify({ ...form, userType }));
+      console.log('Registration successful:', responseData);
       navigate("/");
+      
     } catch (error) {
-      alert(error.message);
+      console.error('Registration error:', error);
+      setError(error.message || "An error occurred during registration.");
     }
   };
 
   return (
     <div className="form-container">
       <h2 className="form-title">Sign Up</h2>
+      {error && (
+        <div className="error-message">
+          {error.split('\n').map((err, index) => (
+            <p key={index}>{err}</p>
+          ))}
+        </div>
+      )}
+      
       <div className="user-type-selection">
         <button 
           onClick={() => setUserType('student')}
@@ -161,7 +206,7 @@ const SignUp = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="dob">Date of Birth (YYYY-MM-DD):</label>
+              <label htmlFor="dob">Date of Birth:</label>
               <input
                 type="date"
                 id="dob"

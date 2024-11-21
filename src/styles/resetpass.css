@@ -1,0 +1,39 @@
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-container input {
+    width: 100%;
+    padding-right: 60px; /* Add space for the button */
+    box-sizing: border-box;
+  }
+  
+  .toggle-visibility-btn {
+    position: absolute;
+    right: 10px; /* Position inside the text box */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: orange; /* Set the color to orange */
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .toggle-visibility-btn:hover {
+    text-decoration: underline;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  

@@ -30,18 +30,15 @@ const Login = () => {
       }
 
       const data = await response.json();
-      // Save the token to localStorage
+
       localStorage.setItem('token', data.token);
       console.log('Token stored:', localStorage.getItem('token'));
-      // Proceed with email check and navigation
       handleNavigation(email);
     } catch (error) {
       setError('Invalid email or password');
       return;
     }
     
-
-    // Remove this line when uncommenting the API call
     handleNavigation(email);
   };
 

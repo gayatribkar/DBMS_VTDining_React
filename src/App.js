@@ -7,6 +7,7 @@ import HomePage from './components/HomePage.js';
 import DiningHallDetails from "./components/DiningHallDetails.js";
 import Home from "./adminComponents/home.js"
 import ForgotPassword from './components/forgotpass.js'
+import ResetPassword from './components/ResetPassword.js'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/dining-hall/:hallName" element={<DiningHallDetails />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
       </Routes>
     </Router>
   );
