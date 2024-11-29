@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaHome, FaUtensils, FaChartPie, FaUser, FaStar, FaSearch, FaArrowLeft, FaSignOutAlt , FaAppleAlt, FaClock, FaDollarSign, FaChartLine, FaBuilding,FaPlus, FaMinus, FaInfoCircle, FaTrashAlt, FaEdit} from "react-icons/fa";
+import { FaHome, FaUtensils, FaChartPie, FaUser, FaStar, FaSearch, FaArrowLeft, FaSignOutAlt , FaAppleAlt, FaClock, FaDollarSign, FaChartLine, FaBuilding,FaPlus, FaMinus, FaInfoCircle, FaTrashAlt, FaEdit, FaFireAlt, FaChartBar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
 import "../styles/profile.css";
@@ -698,163 +698,252 @@ const TrackerContent = () => {
   );
   };
 
-const InsightsContent = () => {
-  const [timeFrame, setTimeFrame] = useState('weekly');
-  const [calorieData, setCalorieData] = useState(null);
-  const [spendingData, setSpendingData] = useState(null);
-  const [nutritionalBalanceData, setNutritionalBalanceData] = useState(null);
-  const [micronutrientData, setMicronutrientData] = useState(null);
-  const [mealFrequencyData, setMealFrequencyData] = useState(null);
-  const [diningHallVisitsData, setDiningHallVisitsData] = useState(null);
 
-  useEffect(() => {
-    fetchInsightsData(timeFrame);
-  }, [timeFrame]);
+  const InsightsContent = () => {
+    const [selectedInsight, setSelectedInsight] = useState('calorie-intake');
+    const [insightData, setInsightData] = useState(null);
 
-  const fetchInsightsData = (period) => {
-    setCalorieData(generateDummyCalorieData(period));
-    setSpendingData(generateDummySpendingData(period));
-    setNutritionalBalanceData(generateDummyNutritionalBalanceData());
-    setMicronutrientData(generateDummyMicronutrientData());
-    setMealFrequencyData(generateDummyMealFrequencyData(period));
-    setDiningHallVisitsData(generateDummyDiningHallVisitsData(period));
-  };
+    useEffect(() => {
+        fetchInsightData();
+    }, [selectedInsight]);
 
-  const generateDummyCalorieData = (period) => {
-    return {
-      labels: period === 'weekly' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: [
-        {
-          label: 'Calories Consumed',
-          data: period === 'weekly' ? [2200, 1800, 2000, 2100, 2300, 1900, 2500] : [15000, 16000, 14000, 17000],
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        },
-      ],
+    const fetchInsightData = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No authentication token found');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedInsight}/`, {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch insight data');
+            const data = await response.json();
+            setInsightData(data);
+        } catch (error) {
+            console.error('Error fetching insight data:', error);
+        }
     };
-  };
 
-  const generateDummySpendingData = (period) => {
-    return {
-      labels: period === 'weekly' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: [
-        {
-          label: 'Money Spent ($)',
-          data: period === 'weekly' ? [50, 40, 60, 55, 70, 45, 80] : [300, 320, 280, 350],
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        },
-      ],
+    const generateChartData = () => {
+        if (!insightData || insightData.length === 0) return null; // Handle empty data case
+
+        switch (selectedInsight) {
+            case 'calorie-intake':
+                return {
+                    labels: insightData.map(item => item.entry_date),
+                    datasets: [{
+                        label: 'Calorie Intake',
+                        data: insightData.map(item => item.total_calories),
+                        backgroundColor: 'rgba(255, 102, 0, 0.6)',
+                    }]
+                };
+            case 'money-spent':
+                return {
+                    labels: insightData.map(item => item.date),
+                    datasets: [{
+                        label: 'Money Spent ($)',
+                        data: insightData.map(item => item.total_spent),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    }]
+                };
+            case 'nutritional-balance':
+                return {
+                    labels: ['Carbs', 'Proteins', 'Fats'],
+                    datasets: [{
+                        label: 'Nutritional Balance (g)',
+                        data: [insightData[0]?.total_carbs || 0, insightData[0]?.total_proteins || 0, insightData[0]?.total_fats || 0],
+                        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'],
+                    }]
+                };
+            case 'meal-frequency':
+                return {
+                    labels: insightData.map(item => item.logged_at__date),
+                    datasets: [{
+                        label: 'Meal Frequency',
+                        data: insightData.map(item => item.meal_count),
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    }]
+                };
+            case 'dining-hall-visit':
+                return {
+                    labels: insightData.map(item => item.food_item__dining_hall__dining_hall_name),
+                    datasets: [{
+                        label: 'Dining Hall Visits',
+                        data: insightData.map(item => item.visit_count),
+                        backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                    }]
+                };
+            default:
+                return null;
+        }
     };
-  };
 
-  const generateDummyNutritionalBalanceData = () => {
-    return {
-      labels: ['Carbs', 'Proteins', 'Fats'],
-      datasets: [
-        {
-          label: 'Nutritional Balance',
-          data: [55, 30, 15], // Percentage of daily intake
-          backgroundColor: ['rgba(255 ,99 ,132)', 'rgba(54 ,162 ,235)', 'rgba(255 ,206 ,86)'],
-        },
-      ],
+    const renderChart = () => {
+        const data = generateChartData();
+        if (!data) return null;
+
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: getChartTitle(),
+                },
+            },
+        };
+
+        const ChartComponent = selectedInsight === 'nutritional-balance' ? Pie : Bar;
+
+        return (
+            <div className="chart-container">
+                <ChartComponent data={data} options={options} />
+            </div>
+        );
     };
-};
 
-const generateDummyMicronutrientData = () => {
-    return {
-      labels: ['Vitamin A', 'Vitamin C', 'Calcium', 'Iron'],
-      datasets: [
-        {
-          label: 'Micronutrients Intake',
-          data: [9000 / (1000), 
-                 (90 / (100)), 
-                 (1000 / (100)), 
-                 (18 / (100))], 
-          backgroundColor: ['rgba(75 ,192 ,192)', 
-                            'rgba(153 ,102 ,255)', 
-                            'rgba(255 ,99 ,132)', 
-                            'rgba(255 ,206 ,86)'],
-        },
-      ],
+    const getChartTitle = () => {
+        switch (selectedInsight) {
+            case 'calorie-intake':
+                return 'Calorie Intake Over Time';
+            case 'money-spent':
+                return 'Money Spent on Dining';
+            case 'nutritional-balance':
+                return 'Nutritional Balance';
+            case 'meal-frequency':
+                return 'Meal Frequency';
+            case 'dining-hall-visit':
+                return 'Dining Hall Visit Frequency';
+            default:
+                return '';
+        }
     };
-};
 
-const generateDummyMealFrequencyData = (period) => {
-    return {
-      labels: period === "weekly" ? ["Breakfast", "Lunch", "Dinner"] : ["Week1", "Week2", "Week3", "Week4"],
-      datasets: [
-        {
-          label: "Meals Count",
-          data: period === "weekly" ? [7 * Math.random(), 
-            Math.floor(Math.random() * (10 -7 +1) +7), 
-            Math.floor(Math.random() * (10 -7 +1) +7)] : 
-            [Math.floor(Math.random() * (30 -20 +1) +20), 
-              Math.floor(Math.random() * (30 -20 +1) +20), 
-              Math.floor(Math.random() * (30 -20 +1) +20)],
-          backgroundColor: "rgba(75 ,192 ,192 ,0.6)",
-        },
-      ],
-    };
-};
+    return (
+        <div className="admin-content">
+            <h1 className="section-title">Insights and Analytics</h1>
+            <div className="report-options">
+                <button className={`report-button ${selectedInsight === 'calorie-intake' ? 'active' : ''}`} onClick={() => setSelectedInsight('calorie-intake')}>
+                    <FaFireAlt /> Calorie Intake
+                </button>
+                <button className={`report-button ${selectedInsight === 'money-spent' ? 'active' : ''}`} onClick={() => setSelectedInsight('money-spent')}>
+                    <FaDollarSign /> Money Spent
+                </button>
+                <button className={`report-button ${selectedInsight === 'nutritional-balance' ? 'active' : ''}`} onClick={() => setSelectedInsight('nutritional-balance')}>
+                    <FaUtensils /> Nutritional Balance
+                </button>
+                <button className={`report-button ${selectedInsight === 'meal-frequency' ? 'active' : ''}`} onClick={() => setSelectedInsight('meal-frequency')}>
+                    <FaClock /> Meal Frequency
+                </button>
+                <button className={`report-button ${selectedInsight === 'dining-hall-visit' ? 'active' : ''}`} onClick={() => setSelectedInsight('dining-hall-visit')}>
+                    <FaBuilding /> Dining Hall Visits
+                </button>
+            </div>
 
-const generateDummyDiningHallVisitsData = (period) => {
-    return {
-      labels: ["Owens", "Turner", "West End", "Squires", "D2"],
-      datasets: [
-        {
-          label: "Visit Frequency",
-          data: [Math.floor(Math.random() * (50 -30 +1) +30), 
-            Math.floor(Math.random() * (50 -30 +1) +30), 
-            Math.floor(Math.random() * (50 -30 +1) +30), 
-            Math.floor(Math.random() * (50 -30 +1) +30), 
-            Math.floor(Math.random() * (50 -30 +1) +30)],
-          backgroundColor: "rgba(153 ,102 ,255 ,0.6)",
-        },
-      ],
-    };
-};
+            {/* Check if there is no insight data */}
+            {(!insightData || insightData.length === 0) && (
+                <div className="no-data-message" style={{ fontWeight: "bold", textAlign:"center", marginTop:"20px" }}>
+                    Start adding food items to see insights!
+                </div>
+            )}
 
-  
-return (
-    <div className="insights-section">
-      <h1 className="section-title">Insights</h1>
-      <p>See detailed insights on your eating habits and spending trends at VT dining halls.</p>
-      
-      <div className="time-frame-selector">
-        <button onClick={() => setTimeFrame('weekly')}>Weekly</button>
-        <button onClick={() => setTimeFrame('monthly')}>Monthly</button>
-      </div>
+            {/* Only render chart and stats if there is data */}
+            {insightData && insightData.length > 0 && (
+              <>
+                  <div className="stat-card">
+                      <h2>{getChartTitle()}</h2>
+                      {renderChart()}
+                  </div>
 
-      <div className="insight-card">
-        <h2><FaAppleAlt /> Calorie Intake Over Time</h2>
-        {calorieData && <Line data={calorieData} />}
-      </div>
-
-      <div className="insight-card">
-        <h2><FaDollarSign /> Money Spent on Dining</h2>
-        {spendingData && <Bar data={spendingData} />}
-      </div>
-
-      <div className="insight-card">
-        <h2><FaUtensils /> Nutritional Balance</h2>
-        {nutritionalBalanceData && <Pie data={nutritionalBalanceData} />}
-      </div>
-
-      <div className="insight-card">
-        <h2><FaAppleAlt /> Micronutrient Intake</h2>
-        {micronutrientData && <Radar data={micronutrientData} />}
-      </div>
-
-      <div className="insight-card">
-        <h2><FaClock /> Meal Frequency</h2>
-        {mealFrequencyData && <Bar data={mealFrequencyData} />}
-      </div>
-
-      <div className="insight-card">
-        <h2><FaBuilding /> Dining Hall Visit Frequency</h2>
-        {diningHallVisitsData && <Bar data={diningHallVisitsData} />}
-      </div>
-    </div>
-);
+                  <div className="quick-stats">
+                      {selectedInsight === 'calorie-intake' && (
+                          <>
+                              <div className="stat-card">
+                                  <h3>Total Calories</h3>
+                                  <p>{insightData.reduce((sum, item) => sum + item.total_calories, 0)}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Average Daily Calories</h3>
+                                  <p>{(insightData.reduce((sum, item) => sum + item.total_calories, 0) / insightData.length).toFixed(2)}</p>
+                              </div>
+                          </>
+                      )}
+                      {selectedInsight === 'money-spent' && (
+                          <>
+                              <div className="stat-card">
+                                  <h3>Total Spent</h3>
+                                  <p>${insightData.reduce((sum, item) => sum + item.total_spent, 0).toFixed(2)}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Average Spent per Day</h3>
+                                  <p>${(insightData.reduce((sum, item) => sum + item.total_spent, 0) / insightData.length).toFixed(2)}</p>
+                              </div>
+                          </>
+                      )}
+                      
+                      {selectedInsight === 'nutritional-balance' && (
+                          <>
+                              <div className="stat-card">
+                                  <h3>Total Carbs</h3>
+                                  <p>{insightData[0]?.total_carbs?.toFixed(1) || 0}g</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Total Proteins</h3>
+                                  <p>{insightData[0]?.total_proteins?.toFixed(1) || 0}g</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Total Fats</h3>
+                                  <p>{insightData[0]?.total_fats?.toFixed(1) || 0}g</p>
+                              </div>
+                          </>
+                      )}
+                      
+                      {selectedInsight === 'meal-frequency' && (
+                          <>
+                              <div className="stat-card">
+                                  <h3>Total Meals</h3>
+                                  <p>{insightData.reduce((sum, item) => sum + item.meal_count, 0)}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Average Meals per Day</h3>
+                                  <p>{(insightData.reduce((sum, item) => sum + item.meal_count, 0) / insightData.length).toFixed(2)}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Max Meals in a Day</h3>
+                                  <p>{Math.max(...insightData.map(item => item.meal_count))}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Min Meals in a Day</h3>
+                                  <p>{Math.min(...insightData.map(item => item.meal_count))}</p>
+                              </div>
+                          </>
+                      )}
+                      
+                      {selectedInsight === 'dining-hall-visit' && (
+                          <>
+                              <div className="stat-card">
+                                  <h3>Total Visits</h3>
+                                  <p>{insightData.reduce((sum, item) => sum + item.visit_count, 0)}</p>
+                              </div>
+                              <div className="stat-card">
+                                  <h3>Most Visited Hall</h3>
+                                  <p>{insightData.sort((a, b) => b.visit_count - a.visit_count)[0]?.food_item__dining_hall__dining_hall_name}</p>
+                              </div>
+                          </>
+                      )}
+                  </div> 
+              </>
+          )}
+        </div> 
+    );
 };
 
 const ProfileContent = () => {

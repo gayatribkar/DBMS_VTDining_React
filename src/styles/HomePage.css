@@ -985,3 +985,92 @@ body {
 
 
 
+.insights-section {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.insights-section h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.insight-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.insight-button {
+  background-color: #FF6600;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.insight-button:hover, .insight-button.active {
+  background-color: #e55c00;
+}
+
+.time-frame-selector {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.time-frame-selector button {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.time-frame-selector button.active {
+  background-color: #861F41;
+  color: white;
+}
+
+.insight-summary {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.insight-summary h2 {
+  color: #861F41;
+  margin-bottom: 15px;
+}
+
+.additional-stats {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.additional-stats h3 {
+  color: #861F41;
+  margin-bottom: 15px;
+}
+
+.additional-stats p {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.chart-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 350px;
+}
+

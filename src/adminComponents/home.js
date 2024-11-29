@@ -825,7 +825,7 @@ const MenusContent = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://127.0.0.1:8000/api/dining-halls/', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Token ${token}` }
       });
       const data = await response.json();
       setDiningHalls(data);
@@ -837,8 +837,8 @@ const MenusContent = () => {
   const fetchRestaurants = async (diningHallId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/restaurants/?dining_hall=${diningHallId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(`http://127.0.0.1:8000/api/restaurants/?dining_hall=${diningHallId}`, {
+        headers: { 'Authorization': `Token ${token}` }
       });
       const data = await response.json();
       setRestaurants(prev => ({ ...prev, [diningHallId]: data }));
@@ -850,8 +850,8 @@ const MenusContent = () => {
   const fetchMenuItems = async (restaurantId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/food_items/?restaurant=${restaurantId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(`http://127.0.0.1:8000/api/food_items/?restaurant=${restaurantId}`, {
+        headers: { 'Authorization': `Token ${token}` }
       });
       const data = await response.json();
       setMenuItems(prev => ({ ...prev, [restaurantId]: data }));
@@ -873,10 +873,25 @@ const MenusContent = () => {
     setShowEditModal(true);
   };
 
-  const handleDeleteMenuItem = (itemId, restaurantId) => {
+  const handleDeleteMenuItem = async (itemId, restaurantId) => {
     if (window.confirm("Are you sure you want to delete this menu item?")) {
-      const updatedMenuItems = menuItems[restaurantId].filter(item => item.food_id !== itemId);
-      setMenuItems(prev => ({ ...prev, [restaurantId]: updatedMenuItems }));
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://127.0.0.1:8000/api/food_items/${itemId}/`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        if (response.ok) {
+          const updatedMenuItems = menuItems[restaurantId].filter(item => item.food_id !== itemId);
+          setMenuItems(prev => ({ ...prev, [restaurantId]: updatedMenuItems }));
+        } else {
+          throw new Error('Failed to delete item');
+        }
+      } catch (error) {
+        console.error('Error deleting menu item:', error);
+      }
     }
   };
 
@@ -900,35 +915,71 @@ const MenusContent = () => {
     }
   };
 
-  const handleSubmitNewItem = (e) => {
+  const handleSubmitNewItem = async (e) => {
     e.preventDefault();
-    // Here you would typically send a POST request to add the new item
-    // For now, we'll just update the local state
-    const newItem = { ...newMenuItem, food_id: Date.now() }; // Temporary ID
-    setMenuItems(prev => ({
-      ...prev,
-      [currentRestaurantId]: [...(prev[currentRestaurantId] || []), newItem]
-    }));
-    setShowAddModal(false);
-    setNewMenuItem({
-      food_name: '', price: '', allergens_info: '', calories: '',
-      serving_size: '', total_fat: '', saturated_fat: '', trans_fat: '',
-      cholesterol: '', sodium: '', total_carbohydrates: '', dietary_fiber: '',
-      sugars: '', protein: '', vitamin_d: '', calcium: '', iron: '', potassium: ''
-    });
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/food_items/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify({
+          ...newMenuItem,
+          restaurant: currentRestaurantId,
+          dining_hall: currentDiningHallId
+        })
+      });
+      if (response.ok) {
+        const newItem = await response.json();
+        setMenuItems(prev => ({
+          ...prev,
+          [currentRestaurantId]: [...(prev[currentRestaurantId] || []), newItem]
+        }));
+        setShowAddModal(false);
+        setNewMenuItem({
+          food_name: '', price: '', allergens_info: '', calories: '',
+          serving_size: '', total_fat: '', saturated_fat: '', trans_fat: '',
+          cholesterol: '', sodium: '', total_carbohydrates: '', dietary_fiber: '',
+          sugars: '', protein: '', vitamin_d: '', calcium: '', iron: '', potassium: ''
+        });
+      } else {
+        throw new Error('Failed to add item');
+      }
+    } catch (error) {
+      console.error('Error adding menu item:', error);
+    }
   };
 
-  const handleSubmitEdit = (e) => {
+  const handleSubmitEdit = async (e) => {
     e.preventDefault();
-
-    setMenuItems(prev => ({
-      ...prev,
-      [currentRestaurantId]: prev[currentRestaurantId].map(item =>
-        item.food_id === editingMenuItem.food_id ? editingMenuItem : item
-      )
-    }));
-    setShowEditModal(false);
-    setEditingMenuItem(null);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://127.0.0.1:8000/api/food_items/${editingMenuItem.food_id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify(editingMenuItem)
+      });
+      if (response.ok) {
+        const updatedItem = await response.json();
+        setMenuItems(prev => ({
+          ...prev,
+          [currentRestaurantId]: prev[currentRestaurantId].map(item =>
+            item.food_id === updatedItem.food_id ? updatedItem : item
+          )
+        }));
+        setShowEditModal(false);
+        setEditingMenuItem(null);
+      } else {
+        throw new Error('Failed to update item');
+      }
+    } catch (error) {
+      console.error('Error updating menu item:', error);
+    }
   };
 
   return (
@@ -987,9 +1038,9 @@ const MenusContent = () => {
                                 <td>{item.allergens_info}</td>
                                 <td>{item.calories}</td>
                                 <td>
-                                total_fat:{item.total_fat}, saturated_fat: {item.saturated_fat}, trans_fat: {item.trans_fat},
-      cholesterol: {item.cholesterol}, sodium: {item.sodium}, total_carbohydrates: {item.total_carbohydrates}, dietary_fiber: {item.dietary_fiber},
-      sugars: {item.sugars}, protein: {item.protein}, vitamin_d: {item.vitamin_d}, calcium: {item.calcium}, iron: {item.iron}, potassium: {item.potassium}
+                                  total_fat:{item.total_fat}, saturated_fat: {item.saturated_fat}, trans_fat: {item.trans_fat},
+                                  cholesterol: {item.cholesterol}, sodium: {item.sodium}, total_carbohydrates: {item.total_carbohydrates}, dietary_fiber: {item.dietary_fiber},
+                                  sugars: {item.sugars}, protein: {item.protein}, vitamin_d: {item.vitamin_d}, calcium: {item.calcium}, iron: {item.iron}, potassium: {item.potassium}
                                 </td>
                                 <td>
                                   <button className="action-button edit" onClick={() => handleEditMenuItem(item, diningHall.dining_id, restaurant.restaurant_id)}>
@@ -1013,7 +1064,7 @@ const MenusContent = () => {
         ))}
       </div>
 
-   {showAddModal && (
+    {showAddModal && (
       <div className="modal">
         <div className="modal-content">
           <h2>Add New Menu Item</h2>
@@ -1271,130 +1322,7 @@ const ReportsContent = () => {
     </div>
   );
 };
-// const ReportsContent = () => {
-//   const [selectedReport, setSelectedReport] = useState('popularity');
-//   const [reportData, setReportData] = useState(null);
-//   const chartRef = useRef(null);
 
-//   useEffect(() => {
-//     generateReport(selectedReport);
-//   }, [selectedReport]);
-
-//   const generateDummyData = (reportType) => {
-//     switch (reportType) {
-//       case 'popularity':
-//         return {
-//           labels: ['Burger', 'Pizza', 'Salad', 'Smoothie', 'Sandwich'],
-//           datasets: [
-//             {
-//               label: 'Item Popularity',
-//               data: [500, 450, 300, 200, 350],
-//               backgroundColor: 'rgba(75, 192, 192, 0.6)',
-//             },
-//           ],
-//         };
-//       case 'earnings':
-//         return {
-//           labels: ['Owens', 'Turner', 'West End', 'Squires', 'D2'],
-//           datasets: [
-//             {
-//               label: 'Daily Earnings ($)',
-//               data: [5000, 4500, 3800, 3200, 4200],
-//               backgroundColor: 'rgba(153, 102, 255, 0.6)',
-//             },
-//           ],
-//         };
-//       case 'sales':
-//         return {
-//           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-//           datasets: [
-//             {
-//               label: 'Weekly Sales',
-//               data: [3000, 3500, 4000, 3800, 5000, 4500, 3200],
-//               borderColor: 'rgb(75, 192, 192)',
-//               tension: 0.1,
-//             },
-//           ],
-//         };
-//       default:
-//         return null;
-//     }
-//   };
-
-//   const generateReport = (reportType) => {
-//     const data = generateDummyData(reportType);
-//     setReportData(data);
-//   };
-
-//   const renderChart = () => {
-//     if (!reportData) return null;
-
-//     const options = {
-//       responsive: true,
-//       maintainAspectRatio: false,
-//       plugins: {
-//         legend: {
-//           position: 'top',
-//         },
-//         title: {
-//           display: true,
-//           text: getChartTitle(),
-//         },
-//       },
-//     };
-
-//     const ChartComponent = selectedReport === 'sales' ? Line : Bar;
-
-//     return (
-//       <div style={{ height: '300px', width: '100%' }}>
-//         <ChartComponent
-//           data={reportData}
-//           options={options}
-//         />
-//       </div>
-//     );
-//   };
-
-//   const getChartTitle = () => {
-//     switch (selectedReport) {
-//       case 'popularity':
-//         return 'Most Popular Items Across All Dining Halls';
-//       case 'earnings':
-//         return 'Daily Earnings by Dining Hall';
-//       case 'sales':
-//         return 'Weekly Sales Trend';
-//       default:
-//         return '';
-//     }
-//   };
-
-//   return (
-//     <div className="reports-section">
-//       <h1>Reports and Analytics</h1>
-//       <div className="report-options">
-//         <button className={`report-button ${selectedReport === 'popularity' ? 'active' : ''}`} onClick={() => setSelectedReport('popularity')}>
-//           <FaFileAlt /> Item Popularity
-//         </button>
-//         <button className={`report-button ${selectedReport === 'earnings' ? 'active' : ''}`} onClick={() => setSelectedReport('earnings')}>
-//           <FaFileAlt /> Dining Hall Earnings
-//         </button>
-//         <button className={`report-button ${selectedReport === 'sales' ? 'active' : ''}`} onClick={() => setSelectedReport('sales')}>
-//           <FaFileAlt /> Sales Trends
-//         </button>
-//       </div>
-//       <div className="report-summary">
-//         <h2>{getChartTitle()}</h2>
-//         {renderChart()}
-//       </div>
-//       <div className="additional-stats">
-//         <h3>Quick Stats</h3>
-//         <p>Total Daily Earnings: $20,700</p>
-//         <p>Most Popular Item: Burger (Owens Food Court)</p>
-//         <p>Highest Earning Dining Hall: Owens Food Court ($5,000)</p>
-//       </div>
-//     </div>
-//   );
-// };
 
 
 export default Home;
