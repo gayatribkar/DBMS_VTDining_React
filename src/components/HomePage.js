@@ -128,6 +128,26 @@ const DiningHallsContent = () => {
     );
   }, [searchTerm, diningHalls]);
 
+  const isOpen = (hours) => {
+    const now = new Date();
+    const [start, end] = hours.split(' - ');
+    const [startHour, startMinute] = start.slice(0, -2).split(':');
+    const [endHour, endMinute] = end.slice(0, -2).split(':');
+
+    const startTime = new Date(now);
+    startTime.setHours(parseInt(startHour) + (start.includes('PM') && startHour !== '12' ? 12 : 0), parseInt(startMinute) || 0, 0);
+
+    const endTime = new Date(now);
+    endTime.setHours(parseInt(endHour) + (end.includes('PM') && endHour !== '12' ? 12 : 0), parseInt(endMinute) || 0, 0);
+
+    if (endTime < startTime) {
+        return now >= startTime || now <= endTime; 
+    }
+
+    return now >= startTime && now <= endTime; 
+};
+
+
   const handleHallClick = (hall) => {
     setSelectedHall(hall);
   };
@@ -160,12 +180,19 @@ const DiningHallsContent = () => {
           <div key={hall.dining_id} className="dining-hall-card" onClick={() => handleHallClick(hall)}>
             <h3>{hall.dining_hall_name}</h3>
             <p>{hall.dining_hall_location !== 'N/A' ? hall.dining_hall_location : 'Location not specified'}</p>
+            <p>Hours: {hall.dining_hall_hours}</p>
             <p>
-              <span className="status-badge status-open">Open</span>
+              <span className={`status-badge ${isOpen(hall.dining_hall_hours) ? 'status-open' : 'status-closed'}`}>
+                {isOpen(hall.dining_hall_hours) ? 'Open' : 'Closed'}
+              </span>
             </p>
-            <div className="rating">
+            
+            {/* <p>
+              <span className="status-badge status-open">Open</span>
+            </p> */}
+            {/* <div className="rating">
               <FaStar /> 4.0
-            </div>
+            </div> */}
           </div>
         ))}
       </div>
@@ -762,7 +789,7 @@ const TrackerContent = () => {
                 };
             case 'meal-frequency':
                 return {
-                    labels: insightData.map(item => item.logged_at__date),
+                    labels: insightData.map(item => item.date),
                     datasets: [{
                         label: 'Meal Frequency',
                         data: insightData.map(item => item.meal_count),

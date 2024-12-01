@@ -747,3 +747,20 @@
   max-width: 900px;
   margin: 0 auto;
 }
+
+.chart-controls {
+  margin-bottom: 20px;
+}
+
+.chart-controls button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.chart-controls button.active {
+  background-color: #4caf50;
+  color: white;
+}

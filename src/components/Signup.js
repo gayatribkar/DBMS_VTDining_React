@@ -284,26 +284,26 @@ const SignUp = () => {
           </>
         )}
 
-        <div className="form-group password-container">
-          <label htmlFor="password">Password:</label>
-          <div className="password-input-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-            <button
-              type="button"
-              className="toggle-password"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </div>
+<div className="form-group">
+  <label htmlFor="password">Password:</label>
+  <div className="password-input-wrapper">
+    <input
+      type={showPassword ? "text" : "password"}
+      id="password"
+      name="password"
+      value={form.password}
+      onChange={handleChange}
+      required
+    />
+    <button
+      type="button"
+      className="toggle-password"
+      onClick={() => setShowPassword(!showPassword)}
+    >
+      {showPassword ? "Hide" : "Show"}
+    </button>
+  </div>
+</div>
         
         <button type="submit" className="btn-submit">
           Sign Up as {userType === 'student' ? 'Student' : 'Admin'}

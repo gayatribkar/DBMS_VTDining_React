@@ -126,6 +126,11 @@ body {
     color: #28a745;
     background-color: #e8f5e9;
   }
+
+  .status-closed {
+    color: #d32f2f;
+    background-color: #f5eae8;
+  }
   
   .status-busy {
     color: #dc3545;

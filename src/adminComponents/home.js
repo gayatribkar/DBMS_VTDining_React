@@ -68,14 +68,6 @@ const Home = () => {
     <div className="admin-app">
       <header className="admin-navbar sticky-header">
         <h2>VT Dining Admin</h2>
-        {/* <div className="admin-search">
-          <FaSearch />
-          <input type="text" placeholder="Search..." />
-        </div> */}
-        {/* <div className="admin-notifications">
-          <FaBell />
-          <span className="notification-badge">{notifications}</span>
-        </div> */}
         <nav>
           <button className={`nav-button ${activeTab === 'Home' ? 'active' : ''}`} onClick={() => setActiveTab('Home')}>
             <FaHome /> Dashboard
@@ -106,10 +98,14 @@ const DashboardContent = () => {
   const [dashboardData, setDashboardData] = useState({
     total_dining_halls: 0,
     active_menu_items: 0,
+    active_restaurant_items: 0,
     todays_orders: 0,
     total_revenue: 0,
-    weekly_sales: []
+    weekly_sales: [],
+    all_sales: []
   });
+
+  const [chartView, setChartView] = useState('weekly');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -123,15 +119,13 @@ const DashboardContent = () => {
         if (!response.ok) throw new Error('Failed to fetch dashboard data');
         const data = await response.json();
 
-        // Transform weekly_sales into the expected format
-        const transformedWeeklySales = data.weekly_sales.map(([date, daily_revenue]) => ({
-          date,
-          daily_revenue
-        }));
+        // Transform sales data
+        const transformSales = (sales) => sales.map(([date, revenue]) => ({ date, revenue }));
 
         setDashboardData({
           ...data,
-          weekly_sales: transformedWeeklySales
+          weekly_sales: transformSales(data.weekly_sales),
+          all_sales: transformSales(data.all_sales)
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -141,20 +135,20 @@ const DashboardContent = () => {
     fetchDashboardData();
   }, []);
 
-  // Prepare chart data
-  const chartData = {
-    labels: dashboardData.weekly_sales.map(day => day.date), // X-axis labels (dates)
-    datasets: [
-      {
+  const getChartData = () => {
+    const salesData = chartView === 'weekly' ? dashboardData.weekly_sales : dashboardData.all_sales;
+    return {
+      labels: salesData.map(day => day.date),
+      datasets: [{
         label: 'Daily Revenue',
-        data: dashboardData.weekly_sales.map(day => day.daily_revenue), // Y-axis data (revenue)
-        backgroundColor: '#4caf50', // Color of the bars
+        data: salesData.map(day => day.revenue),
+        backgroundColor: '#4caf50',
         borderRadius: 5,
         borderColor: 'rgba(0,0,0,0.1)',
-        hoverBackgroundColor: '#45a049', // Color when hovering over bars
+        hoverBackgroundColor: '#45a049',
         barThickness: 30
-      }
-    ]
+      }]
+    };
   };
 
   return (
@@ -170,6 +164,10 @@ const DashboardContent = () => {
           <p>{dashboardData.active_menu_items}</p>
         </div>
         <div className="stat-card">
+          <h3>Active Restaurants</h3>
+          <p>{dashboardData.active_restaurant_items}</p>
+        </div>
+        <div className="stat-card">
           <h3>Today's Orders</h3>
           <p>{dashboardData.todays_orders}</p>
         </div>
@@ -179,19 +177,33 @@ const DashboardContent = () => {
         </div>
       </div>
       <div className="chart-container">
-        <h2>Weekly Sales Overview</h2>
+        <h2>Sales Overview</h2>
+        <div className="chart-controls">
+          <button 
+            onClick={() => setChartView('weekly')}
+            className={chartView === 'weekly' ? 'active' : ''}
+          >
+            Weekly
+          </button>
+          <button 
+            onClick={() => setChartView('monthly')}
+            className={chartView === 'monthly' ? 'active' : ''}
+          >
+            Monthly
+          </button>
+        </div>
         <div className="chart">
-          <Bar data={chartData} options={{
+          <Bar data={getChartData()} options={{
             responsive: true,
             plugins: {
               title: {
                 display: true,
-                text: 'Weekly Sales Revenue'
+                text: `${chartView.charAt(0).toUpperCase() + chartView.slice(1)} Sales Revenue`
               },
               tooltip: {
                 callbacks: {
                   label: function (tooltipItem) {
-                    return `$${tooltipItem.raw.toFixed(2)}`; // Format tooltip label
+                    return `$${tooltipItem.raw.toFixed(2)}`;
                   }
                 }
               }
@@ -201,7 +213,7 @@ const DashboardContent = () => {
                 beginAtZero: true,
                 ticks: {
                   callback: function(value) {
-                    return `$${value.toFixed(2)}`; // Format Y-axis labels
+                    return `$${value.toFixed(2)}`;
                   }
                 }
               }
@@ -224,7 +236,7 @@ const DiningHallsContent = () => {
     dining_hall_name: '',
     dining_hall_location: '',
     dining_hall_url: '', 
-    openingHours: '7AM - 12PM', // Default value
+    dining_hall_hours: '', // Default value
   });
 
   const token = localStorage.getItem("token");
@@ -276,7 +288,7 @@ const DiningHallsContent = () => {
           dining_hall_name: newDiningHall.dining_hall_name,
           dining_hall_location: newDiningHall.dining_hall_location,
           dining_hall_url: newDiningHall.dining_hall_url || undefined,
-          // openingHours is kept in UI but not sent yet
+          dining_hall_hours: newDiningHall.dining_hall_hours
         }),
       });
       if (response.ok) {
@@ -286,7 +298,7 @@ const DiningHallsContent = () => {
           dining_hall_name: '',
           dining_hall_location: '',
           dining_hall_url: '',
-          openingHours: '7AM - 12PM',
+          dining_hall_hours: '',
         });
       } else {
         console.error('Error adding dining hall:', await response.text());
@@ -367,7 +379,7 @@ const DiningHallsContent = () => {
               <td>{hall.dining_hall_name}</td>
               <td>{hall.dining_hall_location}</td>
               {/* <td>{hall.dining_hall_url || 'N/A'}</td> */}
-              <td>{hall.openingHours || '7AM - 12PM'}</td>
+              <td>{hall.dining_hall_hours || '7AM - 12PM'}</td>
               <td>
                 <button
                   className="action-button edit"
@@ -411,17 +423,17 @@ const DiningHallsContent = () => {
                 placeholder="Location"
                 required
               />
-              <input
+              {/* <input
                 type="text"
                 name="dining_hall_url"
                 value={newDiningHall.dining_hall_url}
                 onChange={handleInputChange}
                 placeholder="Dining Hall URL (Optional)"
-              />
+              /> */}
               <input
                 type="text"
-                name="openingHours"
-                value={newDiningHall.openingHours}
+                name="dining_hall_hours"
+                value={newDiningHall.dining_hall_hours}
                 onChange={handleInputChange}
                 placeholder="Opening Hours"
               />
@@ -457,17 +469,17 @@ const DiningHallsContent = () => {
                 placeholder="Location"
                 required
               />
-              <input
+              {/* <input
                 type="text"
                 name="dining_hall_url"
                 value={editingDiningHall.dining_hall_url || ''}
                 onChange={handleInputChange}
                 placeholder="Dining Hall URL (Optional)"
-              />
+              /> */}
               <input
                 type="text"
-                name="openingHours"
-                value={editingDiningHall.openingHours || ''}
+                name="dining_hall_hours"
+                value={editingDiningHall.dining_hall_hours}
                 onChange={handleInputChange}
                 placeholder="Opening Hours"
               />
@@ -985,7 +997,7 @@ const MenusContent = () => {
   return (
     <div className="menus-section">
       <h1>Manage Menu Items</h1>
-      <div className="search-bar">
+      {/* <div className="search-bar">
         <FaSearch />
         <input
           type="text"
@@ -993,7 +1005,7 @@ const MenusContent = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
+      </div> */}
       <div className="dining-halls-list">
         {diningHalls.map((diningHall) => (
           <div key={diningHall.dining_id} className="dining-hall-row">
@@ -1314,6 +1326,8 @@ const ReportsContent = () => {
           <>
             <p>Total Revenue: ${reportData.transaction_metrics.total_revenue.toFixed(2)}</p>
             <p>Average Transaction: ${reportData.transaction_metrics.avg_transaction.toFixed(2)}</p>
+            <p>Minimum Transaction: ${reportData.transaction_metrics.min_transaction.toFixed(2)}</p>
+            <p>Maximum Transaction: ${reportData.transaction_metrics.max_transaction.toFixed(2)}</p>
             <p>Total Transactions: {reportData.transaction_metrics.total_transactions}</p>
             <p>Average Calories per Item: {reportData.food_item_metrics.avg_calories.toFixed(2)}</p>
           </>
