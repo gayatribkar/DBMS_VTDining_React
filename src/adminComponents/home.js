@@ -186,10 +186,10 @@ const DashboardContent = () => {
             Weekly
           </button>
           <button 
-            onClick={() => setChartView('monthly')}
-            className={chartView === 'monthly' ? 'active' : ''}
+            onClick={() => setChartView('All')}
+            className={chartView === 'All' ? 'active' : ''}
           >
-            Monthly
+            All
           </button>
         </div>
         <div className="chart">
